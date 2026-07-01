@@ -6,12 +6,8 @@ import { SendPaymentFlow } from './views/SendPaymentFlow';
 import { ExplorerComparison } from './views/ExplorerComparison';
 import { CompliancePanel } from './views/CompliancePanel';
 import { TreasuryOverview } from './views/TreasuryOverview';
+import { PageFooter } from './components/PageFooter';
 import { 
-  LayoutGrid, 
-  Send, 
-  Eye, 
-  Briefcase, 
-  Lock,
   ChevronDown,
   LogOut
 } from 'lucide-react';
@@ -63,9 +59,6 @@ const DashboardApp: React.FC = () => {
         <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <img src="/logo.png" alt="ΛRCΛNUM Logo" style={{ height: '24px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(243, 183, 36, 0.35))' }} />
           <span className="logo-text" style={{ fontStyle: 'normal', letterSpacing: '0.15em' }}>ΛRCΛNUM</span>
-          <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', background: 'rgba(255,255,255,0.06)', color: 'var(--color-text-secondary)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-            zk-Stellar Protocol
-          </span>
         </div>
 
         {/* Integrated Header Tabs for full-width navigation */}
@@ -74,7 +67,6 @@ const DashboardApp: React.FC = () => {
             className={`header-nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            <LayoutGrid size={14} />
             <span>Overview</span>
           </button>
           
@@ -82,7 +74,6 @@ const DashboardApp: React.FC = () => {
             className={`header-nav-btn ${activeTab === 'send' ? 'active' : ''}`}
             onClick={() => setActiveTab('send')}
           >
-            <Send size={14} />
             <span>Confidential Send</span>
           </button>
 
@@ -90,7 +81,6 @@ const DashboardApp: React.FC = () => {
             className={`header-nav-btn ${activeTab === 'explorer' ? 'active' : ''}`}
             onClick={() => setActiveTab('explorer')}
           >
-            <Eye size={14} />
             <span>ZK Explorer</span>
           </button>
 
@@ -98,7 +88,6 @@ const DashboardApp: React.FC = () => {
             className={`header-nav-btn ${activeTab === 'compliance' ? 'active' : ''}`}
             onClick={() => setActiveTab('compliance')}
           >
-            <Lock size={14} />
             <span>Compliance Panel</span>
           </button>
 
@@ -106,7 +95,6 @@ const DashboardApp: React.FC = () => {
             className={`header-nav-btn ${activeTab === 'treasury' ? 'active' : ''}`}
             onClick={() => setActiveTab('treasury')}
           >
-            <Briefcase size={14} />
             <span>Treasury Solvency</span>
           </button>
         </nav>
@@ -122,14 +110,14 @@ const DashboardApp: React.FC = () => {
                 gap: '0.5rem', 
                 borderColor: 'rgba(243, 183, 36, 0.3)',
                 backgroundColor: 'rgba(243, 183, 36, 0.04)',
-                padding: '8px 16px',
+                padding: '6px 11px',
                 borderRadius: '8px',
                 cursor: 'pointer'
               }}
               onClick={() => setShowDropdown(!showDropdown)}
             >
               <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--color-success)', boxShadow: '0 0 6px var(--color-success)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--color-text-primary)' }}>
                 {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : ''}
               </span>
               <ChevronDown size={14} style={{ color: 'var(--color-text-secondary)' }} />
@@ -181,29 +169,8 @@ const DashboardApp: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Persistent Page Footer Status */}
-      <footer 
-        style={{ 
-          padding: '1.25rem 4rem', 
-          borderTop: '1px solid var(--border-color)', 
-          textAlign: 'center', 
-          fontSize: '0.7rem', 
-          color: 'var(--color-text-muted)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: 'rgba(10, 11, 13, 0.4)',
-          zIndex: 5
-        }}
-      >
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <span>ZK Prover (Noir): <strong style={{ color: 'var(--color-success)' }}>ACTIVE</strong></span>
-          <span>Soroban Smart Engine: <strong style={{ color: 'var(--color-success)' }}>ONLINE</strong></span>
-        </div>
-        <div>
-          <span>Institutional Trust Shield v1.2.0 • Stellar Testnet</span>
-        </div>
-      </footer>
+      {/* Reusable Brand Footer */}
+      <PageFooter onNavClick={(tab) => { setActiveTab(tab as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
     </div>
   );
 };

@@ -80,7 +80,7 @@ export const CompliancePanel: React.FC = () => {
             <div style={{ padding: '12px', borderLeft: '3px solid var(--color-success)', backgroundColor: 'var(--bg-input)', borderRadius: '0 6px 6px 0', fontSize: '0.85rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, marginBottom: '2px' }}>
                 <span>Sanctions Check policy (OFAC SDN)</span>
-                <span style={{ color: 'var(--color-success)' }}>Active ✓</span>
+                <span style={{ color: 'var(--color-success)' }}>Active</span>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                 Prevents transaction compilation if target public key matches blacklisted sanction nodes.
@@ -90,7 +90,7 @@ export const CompliancePanel: React.FC = () => {
             <div style={{ padding: '12px', borderLeft: '3px solid var(--color-success)', backgroundColor: 'var(--bg-input)', borderRadius: '0 6px 6px 0', fontSize: '0.85rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, marginBottom: '2px' }}>
                 <span>Balance Limit Rule (Range Proofs)</span>
-                <span style={{ color: 'var(--color-success)' }}>Active ✓</span>
+                <span style={{ color: 'var(--color-success)' }}>Active</span>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                 Proves spendable tokens are positive and ledger balance is sufficient.
@@ -100,7 +100,7 @@ export const CompliancePanel: React.FC = () => {
             <div style={{ padding: '12px', borderLeft: '3px solid var(--color-success)', backgroundColor: 'var(--bg-input)', borderRadius: '0 6px 6px 0', fontSize: '0.85rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, marginBottom: '2px' }}>
                 <span>Multi-Signature Approval Rules</span>
-                <span style={{ color: 'var(--color-success)' }}>Active ✓</span>
+                <span style={{ color: 'var(--color-success)' }}>Active</span>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
                 Proves 2-of-3 signatures approved the shielded transaction prior to publishing.

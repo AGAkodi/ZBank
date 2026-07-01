@@ -34,7 +34,7 @@ export const TreasuryOverview: React.FC = () => {
           <div>
             <div className="card-header-flex">
               <span className="card-label">Corporate Solvency Verification</span>
-              <VerifiedBadge type="solvency" text="Assets > Liabilities Verified ✓" />
+              <VerifiedBadge type="solvency" text="Assets > Liabilities Verified" />
             </div>
             <div style={{ margin: '1rem 0' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

@@ -24,6 +24,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .logo-icon {
@@ -45,6 +46,8 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .network-selector {
@@ -104,8 +107,7 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  margin-left: 2.5rem;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 @media (max-width: 900px) {
@@ -118,28 +120,33 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem;
+  padding: 0.4rem 0.7rem;
   border: 1px solid transparent;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.6rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   border-radius: 6px;
-  transition: var(--transition-smooth);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-nav-btn:hover {
   color: var(--color-text-primary);
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(243, 183, 36, 0.03);
+  border-color: rgba(243, 183, 36, 0.1);
+  transform: translateY(-1px);
 }
 
 .header-nav-btn.active {
   color: var(--color-accent);
   background-color: rgba(243, 183, 36, 0.08);
-  border-color: rgba(243, 183, 36, 0.2);
+  border-color: rgba(243, 183, 36, 0.25);
+  box-shadow: 0 0 12px rgba(243, 183, 36, 0.1), inset 0 0 8px rgba(243, 183, 36, 0.03);
 }
 
 /* Expanded View Content Frame */
@@ -192,6 +199,16 @@
   padding: 6rem 4rem;
   z-index: 5;
   background-image: radial-gradient(circle at 75% 40%, rgba(243, 183, 36, 0.06) 0%, transparent 50%);
+  animation: heroGlowPulse 8s infinite alternate ease-in-out;
+}
+
+@keyframes heroGlowPulse {
+  0% {
+    background-image: radial-gradient(circle at 75% 40%, rgba(243, 183, 36, 0.04) 0%, transparent 45%);
+  }
+  100% {
+    background-image: radial-gradient(circle at 75% 40%, rgba(243, 183, 36, 0.09) 0%, transparent 55%);
+  }
 }
 
 @media (max-width: 768px) {
@@ -404,7 +421,9 @@
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(16px);
-  transition: var(--transition-smooth);
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
@@ -420,13 +439,20 @@
 }
 
 .card-premium:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  border-color: rgba(243, 183, 36, 0.25);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 15px rgba(243, 183, 36, 0.06);
+  transform: translateY(-4px);
 }
 
 .card-premium.accented {
   border-color: var(--border-color-glow);
   box-shadow: var(--glass-glow);
+}
+
+.card-premium.accented:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(243, 183, 36, 0.15);
+  transform: translateY(-4px);
 }
 
 .card-header-flex {
@@ -620,18 +646,18 @@
   color: #000;
   border: none;
   border-radius: 8px;
-  padding: 10px 20px;
+  padding: 7px 14px;
   font-weight: 600;
-  font-size: 0.925rem;
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: var(--transition-smooth);
-  box-shadow: 0 4px 16px rgba(0, 229, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(243, 183, 36, 0.15);
 }
 
 .btn-primary:hover {
   background-color: var(--color-accent-hover);
-  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(243, 183, 36, 0.35), 0 0 10px rgba(243, 183, 36, 0.15);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .btn-primary:disabled {
@@ -650,16 +676,18 @@
   color: var(--color-text-primary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 10px 20px;
+  padding: 7px 14px;
   font-weight: 600;
-  font-size: 0.925rem;
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(243, 183, 36, 0.04);
+  border-color: rgba(243, 183, 36, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
 }
 
 /* Form Styles */

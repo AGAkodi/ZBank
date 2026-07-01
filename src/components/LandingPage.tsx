@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useSession } from '../context/SessionContext';
-import { Shield, ShieldCheck, Lock, CheckCircle, Wallet, ArrowRight } from 'lucide-react';
+import { Lock, Wallet, ArrowRight } from 'lucide-react';
 import { VerifiedBadge } from './VerifiedBadge';
+import { FeatureBreakdown } from './FeatureBreakdown';
+import { SupportingFeatureGrid } from './SupportingFeatureGrid';
+import { PageFooter } from './PageFooter';
 
 export const LandingPage: React.FC = () => {
   const { connectWallet } = useSession();
@@ -18,6 +21,37 @@ export const LandingPage: React.FC = () => {
     }
   };
 
+  const landingFeatures = [
+    {
+      id: 'confidential_payments',
+      name: 'Confidential Payments',
+      subtext: 'Transact without exposing your book',
+      body: 'Every payment your institution makes is visible to anyone monitoring your wallet address on a public blockchain. ΛRCΛNUM eliminates that exposure. Transaction amounts and counterparty addresses are cryptographically hidden before hitting the chain — replaced with a zero-knowledge proof that confirms the payment is valid and funds exist, without revealing a single number. What the network sees: verified. What it knows: nothing.',
+      visualType: 'payments' as const
+    },
+    {
+      id: 'zk_compliance',
+      name: 'Zero Knowledge Compliance',
+      subtext: 'Compliant by proof, not disclosure',
+      body: "Regulatory compliance shouldn't require handing over raw identity data. ΛRCΛNUM runs KYC matching and OFAC SDN sanctions screening locally, off-chain, before a transaction is submitted. The result is a cryptographic compliance proof — a mathematical guarantee that all checks passed — submitted on-chain in place of the underlying data. Regulators and counterparties receive confirmation of compliance, not access to your client records.",
+      visualType: 'compliance' as const
+    },
+    {
+      id: 'selective_disclosure',
+      name: 'Selective Disclosure',
+      subtext: 'Privacy by default',
+      body: "Not everyone should see everything, but some people need to see something. ΛRCΛNUM's selective disclosure system lets institutions issue specific viewing permissions to auditors, regulators, or internal finance teams — granting access to decrypt and view particular transaction records without opening up the full ledger. Everyone else sees zero. Permissions can be granted and revoked at any time from the Compliance Panel.",
+      visualType: 'disclosure' as const
+    },
+    {
+      id: 'provable_solvency',
+      name: 'Provable Solvency',
+      subtext: 'Prove your position without revealing it',
+      body: "Prove your financial stability without exposing actual treasury holdings. ΛRCΛNUM generates a zero-knowledge range proof validating that your assets exceed liabilities, satisfying auditing requirements while keeping specific balances, counterparty profiles, and vault structures entirely hidden.",
+      visualType: 'solvency' as const
+    }
+  ];
+
   return (
     <div className="landing-page-container animate-fade-in">
       
@@ -29,7 +63,7 @@ export const LandingPage: React.FC = () => {
         </div>
         <button 
           className="btn-primary"
-          style={{ padding: '8px 16px' }}
+          style={{ padding: '6px 11px', fontSize: '0.65rem' }}
           disabled={connecting}
           onClick={handleConnectClick}
         >
@@ -67,7 +101,7 @@ export const LandingPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
               <button 
                 className="btn-primary"
-                style={{ padding: '12px 28px', fontSize: '0.95rem' }}
+                style={{ padding: '8px 20px', fontSize: '0.66rem' }}
                 disabled={connecting}
                 onClick={handleConnectClick}
               >
@@ -122,7 +156,7 @@ export const LandingPage: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className="redacted-dot-bar" style={{ width: '60px' }} />
                     <span className="redacted-status" style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
-                      Shielded ✓
+                      Shielded
                     </span>
                   </div>
                 </div>
@@ -138,62 +172,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Marketing Features Highlights */}
-      <section className="landing-features-section">
-        <div className="landing-features-grid">
-          
-          <div className="feature-block">
-            <div className="feature-icon-wrapper">
-              <Shield size={20} />
-            </div>
-            <h3 className="feature-title">Confidential Payments</h3>
-            <p className="feature-desc">
-              Completely redact transaction balances and recipient addresses from public blockchain watchers, maintaining total commercial privacy.
-            </p>
-          </div>
 
-          <div className="feature-block">
-            <div className="feature-icon-wrapper">
-              <CheckCircle size={20} />
-            </div>
-            <h3 className="feature-title">Zero-Knowledge Compliance</h3>
-            <p className="feature-desc">
-              Execute client KYC matching and OFAC SDN registry screenings locally before compiling ZK proofs, ensuring strict regulatory safety.
-            </p>
-          </div>
 
-          <div className="feature-block">
-            <div className="feature-icon-wrapper">
-              <Lock size={20} />
-            </div>
-            <h3 className="feature-title">Selective Disclosure</h3>
-            <p className="feature-desc">
-              Issue specific viewing keys to regulators or internal compliance departments to decrypt specific records, satisfying tax and legal mandates.
-            </p>
-          </div>
+      {/* Alternating Feature Explanations */}
+      <div style={{ padding: '0 4rem' }} className="landing-sub-section">
+        <FeatureBreakdown features={landingFeatures} />
+      </div>
 
-          <div className="feature-block">
-            <div className="feature-icon-wrapper">
-              <ShieldCheck size={20} />
-            </div>
-            <h3 className="feature-title">Provable Solvency</h3>
-            <p className="feature-desc">
-              Prove assets exceed liabilities directly to trading partners without publishing full treasury volumes or exposing liquid account lists.
-            </p>
-          </div>
+      {/* Supporting Grid */}
+      <div style={{ padding: '0 4rem' }} className="landing-sub-section">
+        <SupportingFeatureGrid />
+      </div>
 
-        </div>
-      </section>
-
-      {/* Landing Footer */}
-      <footer className="landing-footer">
-        <span style={{ color: 'var(--color-text-muted)' }}>
-          © 2026 ΛRCΛNUM Inc. Powered by Stellar Soroban contracts and zk-SNARKs.
-        </span>
-        <span style={{ color: 'var(--color-text-muted)' }}>
-          Institutional Grade Blockchain Privacy
-        </span>
-      </footer>
+      {/* Reusable Brand Footer */}
+      <PageFooter onNavClick={handleConnectClick} />
 
     </div>
   );

@@ -78,7 +78,7 @@ export const DashboardOverview: React.FC = () => {
         <div className="card-premium">
           <div className="card-header-flex">
             <span className="card-label">Compliance Status</span>
-            <VerifiedBadge type="verified" text="Active ✓" />
+            <VerifiedBadge type="verified" text="Active" />
           </div>
           <div className="card-val" style={{ color: 'var(--color-success)', textShadow: '0 0 10px rgba(0,230,118,0.2)' }}>
             Compliant
@@ -91,7 +91,7 @@ export const DashboardOverview: React.FC = () => {
         <div className="card-premium">
           <div className="card-header-flex">
             <span className="card-label">Shielded Treasury</span>
-            <VerifiedBadge type="solvency" text="Verified ✓" />
+            <VerifiedBadge type="solvency" text="Verified" />
           </div>
           <div className="card-val">
             <RedactedValue 

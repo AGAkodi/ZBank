@@ -227,7 +227,7 @@ export const ExplorerComparison: React.FC = () => {
                 <span className="redacted-blur" style={{ filter: 'blur(5px)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', userSelect: 'none' }}>
                   •••••••••• {activeTx.currency}
                 </span>
-                <VerifiedBadge type="verified" text="Verified ✓" glow={true} />
+                <VerifiedBadge type="verified" text="Verified" glow={true} />
               </div>
             </div>
 
