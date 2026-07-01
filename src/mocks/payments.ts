@@ -13,6 +13,9 @@ export interface PaymentTransaction {
   stellarTxHash: string;
   isPrivate: boolean;
   memo: string;
+  withinLimit?: boolean;
+  multiSigApproved?: boolean;
+  withinBusinessHours?: boolean;
 }
 
 export const mockPayments: PaymentTransaction[] = [
@@ -30,7 +33,10 @@ export const mockPayments: PaymentTransaction[] = [
     zkProofHash: 'zk_snark_proof_0x5f3a7c...a2d9',
     stellarTxHash: 'st_tx_0x9d4b...c8e1',
     isPrivate: true,
-    memo: 'Supplier invoice #4928'
+    memo: 'Supplier invoice #4928',
+    withinLimit: true,
+    multiSigApproved: true,
+    withinBusinessHours: true
   },
   {
     id: 'tx_90823413',
@@ -46,7 +52,10 @@ export const mockPayments: PaymentTransaction[] = [
     zkProofHash: 'zk_snark_proof_0x8c2b7f...c9d0',
     stellarTxHash: 'st_tx_0x4e2a...f7d3',
     isPrivate: true,
-    memo: 'Liquidity provider replenishment'
+    memo: 'Liquidity provider replenishment',
+    withinLimit: true,
+    multiSigApproved: true,
+    withinBusinessHours: true
   },
   {
     id: 'tx_90823414',
@@ -62,7 +71,10 @@ export const mockPayments: PaymentTransaction[] = [
     zkProofHash: 'zk_snark_proof_0x3e1d6c...f4a0',
     stellarTxHash: 'st_tx_0x8f3c...d8b2',
     isPrivate: true,
-    memo: 'Cross-border liquidity sweep'
+    memo: 'Cross-border liquidity sweep',
+    withinLimit: true,
+    multiSigApproved: true,
+    withinBusinessHours: true
   },
   {
     id: 'tx_90823415',
@@ -78,7 +90,10 @@ export const mockPayments: PaymentTransaction[] = [
     zkProofHash: 'N/A - Proof generation rejected',
     stellarTxHash: 'N/A - Transaction blocked',
     isPrivate: true,
-    memo: 'Simulated compliance violation'
+    memo: 'Simulated compliance violation',
+    withinLimit: true,
+    multiSigApproved: false,
+    withinBusinessHours: true
   },
   {
     id: 'tx_90823416',
@@ -94,6 +109,9 @@ export const mockPayments: PaymentTransaction[] = [
     zkProofHash: 'zk_snark_proof_0x7d9a1c...e3b9',
     stellarTxHash: 'st_tx_0x2c1f...a5d8',
     isPrivate: true,
-    memo: 'Treasury deployment refund'
+    memo: 'Treasury deployment refund',
+    withinLimit: true,
+    multiSigApproved: true,
+    withinBusinessHours: true
   }
 ];
