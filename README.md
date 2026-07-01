@@ -1,32 +1,39 @@
-# React + TypeScript + Vite
+# ΛRCΛNUM
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+ZK-powered institutional banking platform on the Stellar blockchain. Payments are verified with zero-knowledge proofs — compliance checks, amount validation, and solvency attestations happen without revealing addresses, amounts, or balance sheets on-chain.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Next.js 15** (App Router) + React 19 + TypeScript
+- **Stellar** — `@stellar/stellar-sdk` + Freighter wallet (`@stellar/freighter-api` v6)
+- **Noir** — ZK circuits in `circuits/`
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+pnpm install
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Requires the [Freighter](https://www.freighter.app/) browser extension to connect a wallet.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start the dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | Lint with oxlint |
+
+## Project layout
+
+- `src/app/` — Next.js entry (layout + page)
+- `src/views/` — dashboard views (overview, send payment, explorer, compliance, treasury)
+- `src/context/SessionContext.tsx` — global state + Freighter wallet integration
+- `src/services/stellarZkService.ts` — ZK proof flow (currently simulated)
+- `circuits/` — Noir circuits
+
+## Roadmap
+
+See [TODO.md](TODO.md) for the phase-by-phase completion plan.
