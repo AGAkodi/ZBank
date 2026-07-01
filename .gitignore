@@ -16,8 +16,6 @@ dist
 dist-ssr
 *.local
 
-circuits/toy_circuit/target
-
 memory/*
 
 # Editor directories and files
