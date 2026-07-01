@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useSession } from '../context/SessionContext';
 import { ComplianceSummaryStats } from '../components/ComplianceSummaryStats';

@@ -6,12 +6,11 @@ import { ArrowUpRight, ArrowDownLeft, Shield, Eye, Network } from 'lucide-react'
 import type { PaymentTransaction } from '../mocks/payments';
 
 export const DashboardOverview: React.FC = () => {
-  const { 
-    payments, 
-    network, 
-    toggleNetwork, 
-    setActiveTab, 
-    setSelectedTx 
+  const {
+    payments,
+    network,
+    setActiveTab,
+    setSelectedTx
   } = useSession();
 
   const handleInspectTx = (tx: PaymentTransaction) => {
@@ -33,28 +32,21 @@ export const DashboardOverview: React.FC = () => {
           </p>
         </div>
         
-        {/* Network Status Toggle Card */}
-        <div className="card-premium" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1.25rem', margin: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Network size={16} className="logo-icon" />
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--color-text-secondary)' }}>
-              NETWORK STATUS:
-            </span>
-          </div>
-          <div className="network-selector">
-            <button 
-              className={`network-btn ${network === 'testnet' ? 'active' : ''}`}
-              onClick={toggleNetwork}
-            >
-              Testnet
-            </button>
-            <button 
-              className={`network-btn ${network === 'mainnet' ? 'active mainnet' : ''}`}
-              onClick={toggleNetwork}
-            >
-              Mainnet
-            </button>
-          </div>
+        {/* Network Status — read-only, set by Freighter */}
+        <div className="card-premium" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', margin: 0 }}>
+          <Network size={16} className="logo-icon" />
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--color-text-secondary)' }}>
+            NETWORK:
+          </span>
+          <span
+            className={`network-btn active ${network === 'mainnet' ? 'mainnet' : ''}`}
+            style={{ cursor: 'default', pointerEvents: 'none' }}
+          >
+            {network === 'testnet' ? 'Testnet' : 'Mainnet'}
+          </span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
+            via Freighter
+          </span>
         </div>
       </div>
 

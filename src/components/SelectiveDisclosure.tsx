@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import type { SelectiveDisclosureViewer } from '../mocks/compliance';
 import { Shield, UserPlus, X } from 'lucide-react';

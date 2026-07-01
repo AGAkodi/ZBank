@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Cpu, Check, Loader2 } from 'lucide-react';
 import { stellarZkService } from '../services/stellarZkService';

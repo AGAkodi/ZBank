@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { mockTreasury, mockVolumeHistory } from '../mocks/treasury';
 import { VerifiedBadge } from '../components/VerifiedBadge';
@@ -30,7 +32,7 @@ export const TreasuryOverview: React.FC = () => {
       {/* Solvency & Balance Cards */}
       <div className="dashboard-grid" style={{ marginBottom: '3rem' }}>
         
-        <div className="card-premium accented" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="card-premium accented treasury-solvency-card">
           <div>
             <div className="card-header-flex">
               <span className="card-label">Corporate Solvency Verification</span>

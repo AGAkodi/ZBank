@@ -8,11 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
+out
+
+# Vite leftovers (no longer used)
 dist
 dist-ssr
 *.local
 
 circuits/toy_circuit/target
+
+memory/*
 
 # Editor directories and files
 .vscode/*

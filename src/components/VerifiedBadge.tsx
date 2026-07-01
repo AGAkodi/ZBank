@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Shield, Check, Lock, ShieldAlert } from 'lucide-react';
 

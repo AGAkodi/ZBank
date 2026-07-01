@@ -1,4 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  isConnected as freighterIsConnected,
+  isAllowed,
+  requestAccess,
+  getAddress,
+  getNetwork,
+  WatchWalletChanges,
+} from '@stellar/freighter-api';
 import type { PaymentTransaction } from '../mocks/payments';
 import { mockPayments } from '../mocks/payments';
 import type { SelectiveDisclosureViewer, ComplianceProof } from '../mocks/compliance';
@@ -11,7 +21,6 @@ interface SessionContextType {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   network: NetworkType;
-  toggleNetwork: () => void;
   payments: PaymentTransaction[];
   addPayment: (payment: PaymentTransaction) => void;
   auditors: SelectiveDisclosureViewer[];
@@ -22,8 +31,10 @@ interface SessionContextType {
   setSelectedTx: (tx: PaymentTransaction | null) => void;
   walletConnected: boolean;
   walletAddress: string | null;
+  freighterInstalled: boolean | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  connectError: string | null;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -35,10 +46,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [auditors, setAuditors] = useState<SelectiveDisclosureViewer[]>([]);
   const [complianceProofs, setComplianceProofs] = useState<ComplianceProof[]>([]);
   const [selectedTx, setSelectedTx] = useState<PaymentTransaction | null>(null);
-  
+
   // Wallet Connection States
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [freighterInstalled, setFreighterInstalled] = useState<boolean | null>(null);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   // Initialize state from mock files
   useEffect(() => {
@@ -50,21 +63,86 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
-  const toggleNetwork = () => {
-    setNetwork((prev) => (prev === 'mainnet' ? 'testnet' : 'mainnet'));
-  };
+  // Resolve detected network string to our NetworkType
+  const resolveNetwork = (net: string): NetworkType =>
+    net?.toUpperCase().includes('TEST') ? 'testnet' : 'mainnet';
 
-  const connectWallet = async () => {
-    // Simulate interactive wallet extension authorization
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setWalletAddress('GA_ARCANUM_TREASURY_CORP_3891023812');
-    setWalletConnected(true);
-    setActiveTab('overview');
-  };
+  // Auto-reconnect if the user already granted access in a previous session
+  useEffect(() => {
+    let watcher: InstanceType<typeof WatchWalletChanges> | null = null;
+
+    const initWallet = async () => {
+      try {
+        const { isConnected } = await freighterIsConnected();
+        setFreighterInstalled(isConnected);
+        if (!isConnected) return;
+
+        const { isAllowed: allowed } = await isAllowed();
+        if (!allowed) return;
+
+        const { address, error } = await getAddress();
+        if (error || !address) return;
+
+        setWalletAddress(address);
+        setWalletConnected(true);
+        setActiveTab('overview');
+
+        const { network: net } = await getNetwork();
+        setNetwork(resolveNetwork(net));
+
+        // Watch for account/network changes while session is live
+        watcher = new WatchWalletChanges(3000);
+        watcher.watch(({ address: newAddr, network: newNet, error }) => {
+          if (error) return;
+          if (!newAddr) {
+            setWalletConnected(false);
+            setWalletAddress(null);
+          } else {
+            setWalletAddress(newAddr);
+            setWalletConnected(true);
+          }
+          setNetwork(resolveNetwork(newNet));
+        });
+      } catch {
+        // Freighter not available in this environment
+        setFreighterInstalled(false);
+      }
+    };
+
+    initWallet();
+    return () => { watcher?.stop(); };
+  }, []);
+
+  const connectWallet = useCallback(async () => {
+    setConnectError(null);
+    try {
+      const { isConnected } = await freighterIsConnected();
+      if (!isConnected) {
+        throw new Error('Freighter wallet is not installed. Please install the browser extension to continue.');
+      }
+
+      const { address, error } = await requestAccess();
+      if (error) {
+        throw new Error((error as { message?: string }).message ?? 'Wallet connection was rejected.');
+      }
+
+      setWalletAddress(address);
+      setWalletConnected(true);
+      setActiveTab('overview');
+
+      const { network: net } = await getNetwork();
+      setNetwork(resolveNetwork(net));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to connect wallet.';
+      setConnectError(msg);
+      throw err;
+    }
+  }, []);
 
   const disconnectWallet = () => {
     setWalletConnected(false);
     setWalletAddress(null);
+    setConnectError(null);
   };
 
   const addPayment = (payment: PaymentTransaction) => {
@@ -112,7 +190,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         activeTab,
         setActiveTab,
         network,
-        toggleNetwork,
         payments,
         addPayment,
         auditors,
@@ -123,8 +200,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setSelectedTx,
         walletConnected,
         walletAddress,
+        freighterInstalled,
         connectWallet,
-        disconnectWallet
+        disconnectWallet,
+        connectError
       }}
     >
       {children}

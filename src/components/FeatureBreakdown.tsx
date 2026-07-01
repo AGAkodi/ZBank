@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { VerifiedBadge } from './VerifiedBadge';
 import { Lock, CheckCircle2, ShieldCheck, Database, Cpu } from 'lucide-react';

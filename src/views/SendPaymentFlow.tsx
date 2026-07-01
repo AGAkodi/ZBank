@@ -101,7 +101,7 @@ export const SendPaymentFlow: React.FC = () => {
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '1rem' }} className="form-group">
+            <div className="amount-asset-grid form-group">
               <div>
                 <label className="form-label">Transaction Amount</label>
                 <input

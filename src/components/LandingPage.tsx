@@ -1,16 +1,22 @@
+'use client';
+
 import React, { useState } from 'react';
 import { useSession } from '../context/SessionContext';
-import { Lock, Wallet, ArrowRight } from 'lucide-react';
+import { Lock, Wallet, ArrowRight, ExternalLink, AlertTriangle } from 'lucide-react';
 import { VerifiedBadge } from './VerifiedBadge';
 import { FeatureBreakdown } from './FeatureBreakdown';
 import { SupportingFeatureGrid } from './SupportingFeatureGrid';
 import { PageFooter } from './PageFooter';
 
 export const LandingPage: React.FC = () => {
-  const { connectWallet } = useSession();
+  const { connectWallet, freighterInstalled, connectError } = useSession();
   const [connecting, setConnecting] = useState(false);
 
   const handleConnectClick = async () => {
+    if (freighterInstalled === false) {
+      window.open('https://www.freighter.app/', '_blank', 'noopener,noreferrer');
+      return;
+    }
     setConnecting(true);
     try {
       await connectWallet();
@@ -20,6 +26,9 @@ export const LandingPage: React.FC = () => {
       setConnecting(false);
     }
   };
+
+  const isChecking = freighterInstalled === null;
+  const notInstalled = freighterInstalled === false;
 
   const landingFeatures = [
     {
@@ -61,16 +70,21 @@ export const LandingPage: React.FC = () => {
           <img src="/logo.png" alt="ΛRCΛNUM Logo" style={{ height: '24px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(243, 183, 36, 0.35))' }} />
           <span className="logo-text" style={{ fontStyle: 'normal', letterSpacing: '0.15em' }}>ΛRCΛNUM</span>
         </div>
-        <button 
+        <button
           className="btn-primary"
           style={{ padding: '6px 11px', fontSize: '0.65rem' }}
-          disabled={connecting}
+          disabled={connecting || isChecking}
           onClick={handleConnectClick}
         >
           {connecting ? (
             <>
               <div className="proof-loader animate-spin-fast" style={{ width: 14, height: 14 }} />
               <span>Connecting...</span>
+            </>
+          ) : notInstalled ? (
+            <>
+              <ExternalLink size={14} />
+              <span>Install Freighter</span>
             </>
           ) : (
             <>
@@ -98,25 +112,57 @@ export const LandingPage: React.FC = () => {
               Transact securely on a public blockchain with absolute financial privacy. Enforce local compliance controls, prove treasury solvency, and manage audit disclosures using zero-knowledge proofs.
             </p>
             
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-              <button 
-                className="btn-primary"
-                style={{ padding: '8px 20px', fontSize: '0.66rem' }}
-                disabled={connecting}
-                onClick={handleConnectClick}
-              >
-                {connecting ? (
-                  <>
-                    <div className="proof-loader animate-spin-fast" style={{ width: 16, height: 16 }} />
-                    <span>Connecting Wallet...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Connect Stellar Wallet</span>
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '2rem' }}>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  className="btn-primary"
+                  style={{ padding: '10px 22px', fontSize: '0.75rem' }}
+                  disabled={connecting || isChecking}
+                  onClick={handleConnectClick}
+                >
+                  {connecting ? (
+                    <>
+                      <div className="proof-loader animate-spin-fast" style={{ width: 16, height: 16 }} />
+                      <span>Connecting Wallet...</span>
+                    </>
+                  ) : notInstalled ? (
+                    <>
+                      <ExternalLink size={16} />
+                      <span>Install Freighter Extension</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wallet size={16} />
+                      <span>Connect Stellar Wallet</span>
+                      <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Freighter not installed notice */}
+              {notInstalled && (
+                <div className="animate-fade-in" style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', background: 'rgba(255, 152, 0, 0.06)', border: '1px solid rgba(255, 152, 0, 0.2)', borderRadius: '8px', maxWidth: '480px' }}>
+                  <AlertTriangle size={14} style={{ color: '#ff9800', flexShrink: 0, marginTop: '2px' }} />
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                    Freighter wallet extension is required. Install it from{' '}
+                    <a href="https://www.freighter.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#ff9800', textDecoration: 'underline' }}>
+                      freighter.app
+                    </a>
+                    , then refresh this page.
+                  </p>
+                </div>
+              )}
+
+              {/* Connection error notice */}
+              {connectError && !notInstalled && (
+                <div className="animate-fade-in" style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', background: 'var(--color-error-dim)', border: '1px solid rgba(255, 23, 68, 0.2)', borderRadius: '8px', maxWidth: '480px' }}>
+                  <AlertTriangle size={14} style={{ color: 'var(--color-error)', flexShrink: 0, marginTop: '2px' }} />
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                    {connectError}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -175,12 +221,12 @@ export const LandingPage: React.FC = () => {
 
 
       {/* Alternating Feature Explanations */}
-      <div style={{ padding: '0 4rem' }} className="landing-sub-section">
+      <div className="landing-sub-section">
         <FeatureBreakdown features={landingFeatures} />
       </div>
 
       {/* Supporting Grid */}
-      <div style={{ padding: '0 4rem' }} className="landing-sub-section">
+      <div className="landing-sub-section">
         <SupportingFeatureGrid />
       </div>
 

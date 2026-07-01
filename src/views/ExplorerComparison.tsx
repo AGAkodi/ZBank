@@ -4,7 +4,7 @@ import { Shield, Eye, CheckCircle2, Lock } from 'lucide-react';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 
 export const ExplorerComparison: React.FC = () => {
-  const { payments, selectedTx, setSelectedTx } = useSession();
+  const { payments, selectedTx, setSelectedTx, walletAddress } = useSession();
   const [mobileTab, setMobileTab] = useState<'institution' | 'public'>('institution');
 
   // If no transactions exist, show empty state
@@ -130,8 +130,8 @@ export const ExplorerComparison: React.FC = () => {
 
             <div className="explorer-data-row">
               <span className="explorer-data-lbl">Sender Wallet</span>
-              <span className="explorer-data-val mono">
-                GA_ARCANUM_TREASURY_CORP_3891023812
+              <span className="explorer-data-val mono" style={{ wordBreak: 'break-all' }}>
+                {walletAddress ?? '—'}
               </span>
             </div>
 
