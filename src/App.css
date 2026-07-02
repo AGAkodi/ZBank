@@ -1654,3 +1654,41 @@
   word-break: break-all;
   text-align: right;
 }
+
+/* ─── Responsive Features Breakdown & Grid ─── */
+@media (max-width: 900px) {
+  .feature-alternating-row {
+    grid-template-columns: 1fr !important;
+    gap: 2.5rem !important;
+  }
+  .feature-alternating-row > div {
+    order: unset !important;
+  }
+  .supporting-features-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .supporting-features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+}
+
+/* ─── Responsive Footer Layout ─── */
+@media (max-width: 768px) {
+  .footer-columns-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2.5rem !important;
+  }
+  .footer-bottom-flex {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+  .landing-page-footer {
+    padding: 3rem 1.5rem 1.5rem 1.5rem !important;
+  }
+}
