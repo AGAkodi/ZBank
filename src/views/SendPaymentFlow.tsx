@@ -4,6 +4,8 @@ import { ProofGenerationFlow } from '../components/ProofGenerationFlow';
 import { ComplianceFailureResult } from '../components/ComplianceFailureResult';
 import { ShieldCheck, ArrowRight, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { VerifiedBadge } from '../components/VerifiedBadge';
+import { isRealTxHash } from '../lib/useHorizon';
+import { explorerTxUrl } from '../config/contracts';
 
 export const SendPaymentFlow: React.FC = () => {
   const { addPayment, setActiveTab } = useSession();
@@ -225,7 +227,20 @@ export const SendPaymentFlow: React.FC = () => {
                 </div>
                 <div className="result-detail-row">
                   <span className="result-detail-lbl">Transaction Hash</span>
-                  <span className="result-detail-val">{generatedTx.stellarTxHash}</span>
+                  <span className="result-detail-val">
+                    {isRealTxHash(generatedTx.stellarTxHash) ? (
+                      <a
+                        href={explorerTxUrl(generatedTx.stellarTxHash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: 'var(--color-accent)', textDecoration: 'underline' }}
+                      >
+                        {generatedTx.stellarTxHash}
+                      </a>
+                    ) : (
+                      generatedTx.stellarTxHash
+                    )}
+                  </span>
                 </div>
                 <div className="result-detail-row">
                   <span className="result-detail-lbl">ZKP zk-SNARK Hash</span>

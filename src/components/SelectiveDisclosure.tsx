@@ -37,7 +37,6 @@ export const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({ viewer
   const addViewer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName || !newOrg) {
-      alert('Please fill out all fields.');
       return;
     }
 

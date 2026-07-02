@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import type { ComplianceProof } from '../mocks/compliance';
+import { ProofDetailModal } from './ProofDetailModal';
 
 interface ComplianceProofLogProps {
   proofs: ComplianceProof[];
@@ -11,11 +12,14 @@ type FilterType = 'All' | 'Passed' | 'Failed';
 
 export const ComplianceProofLog: React.FC<ComplianceProofLogProps> = ({ proofs }) => {
   const [filter, setFilter] = useState<FilterType>('All');
+  const [selectedProof, setSelectedProof] = useState<ComplianceProof | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Stub function for viewing proof
-  const viewProof = (transactionId: string) => {
-    console.log(`View proof triggered for transaction: ${transactionId}`);
-    alert(`Decrypted ZK Verification Credential\nTransaction Ref: ${transactionId}\nStatus: Verified On-Chain via Soroban Contract`);
+  // Function for viewing proof
+  const viewProof = (proof: ComplianceProof) => {
+    console.log(`View proof triggered for transaction: ${proof.id}`);
+    setSelectedProof(proof);
+    setIsModalOpen(true);
   };
 
   const filteredProofs = proofs.filter(p => {
@@ -152,7 +156,7 @@ export const ComplianceProofLog: React.FC<ComplianceProofLogProps> = ({ proofs }
                     <td style={{ textAlign: 'right' }}>
                       <button
                         className="btn-secondary"
-                        onClick={() => viewProof(proof.id)}
+                        onClick={() => viewProof(proof)}
                         style={{ fontSize: '0.65rem', padding: '4px 10px', borderRadius: '4px' }}
                       >
                         View Proof
@@ -166,6 +170,11 @@ export const ComplianceProofLog: React.FC<ComplianceProofLogProps> = ({ proofs }
         </table>
       </div>
 
+      <ProofDetailModal 
+        proof={selectedProof} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 };

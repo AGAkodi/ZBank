@@ -13,15 +13,14 @@ export const LandingPage: React.FC = () => {
   const [connecting, setConnecting] = useState(false);
 
   const handleConnectClick = async () => {
-    if (freighterInstalled === false) {
-      window.open('https://www.freighter.app/', '_blank', 'noopener,noreferrer');
-      return;
-    }
     setConnecting(true);
     try {
       await connectWallet();
     } catch (err) {
       console.error(err);
+      if (freighterInstalled === false) {
+        window.open('https://www.freighter.app/', '_blank', 'noopener,noreferrer');
+      }
     } finally {
       setConnecting(false);
     }

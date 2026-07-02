@@ -6,6 +6,7 @@ export interface ComplianceProof {
   status: 'Passed' | 'Pending' | 'Failed';
   verificationHash: string;
   policyDetails: string;
+  txHash?: string;
 }
 
 export interface SelectiveDisclosureViewer {

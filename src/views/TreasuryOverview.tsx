@@ -130,8 +130,11 @@ export const TreasuryOverview: React.FC = () => {
         }
       }
       return null;
-    } catch (err) {
+    } catch (err: any) {
       console.error("fetchSolvencyAttestation failed:", err);
+      if (err && err.stack) {
+        console.error(err.stack);
+      }
       throw err;
     }
   };
