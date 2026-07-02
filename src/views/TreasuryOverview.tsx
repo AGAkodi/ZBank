@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { mockTreasury, mockVolumeHistory } from '../mocks/treasury';
 import { useSession } from '../context/SessionContext';
 import { useXlmBalance } from '../lib/useHorizon';
 import { VerifiedBadge } from '../components/VerifiedBadge';
 import { RedactedValue } from '../components/RedactedValue';
 import { ComingSoonBadge } from '../components/ComingSoonBadge';
+import { CONTRACTS } from '../config/contracts';
 import { 
   Briefcase, 
   Layers, 
@@ -15,15 +16,267 @@ import {
   FileCheck, 
   FileSpreadsheet, 
   TrendingUp,
-  Cpu
+  Cpu,
+  Loader2,
+  Check,
+  AlertTriangle
 } from 'lucide-react';
 
 export const TreasuryOverview: React.FC = () => {
-  const { walletAddress } = useSession();
+  const { walletAddress, payments } = useSession();
   // Live testnet XLM balance for the connected wallet (Horizon)
   const liveBalance = useXlmBalance(walletAddress);
+
+  // Addition 1 — Derive volume chart from real payments state
+  const derivedVolumeHistory = useMemo(() => {
+    if (!payments || payments.length === 0) return [];
+    
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const groups: { [dateStr: string]: { dateVal: Date; count: number } } = {};
+    
+    payments.forEach(p => {
+      try {
+        const d = new Date(p.timestamp);
+        if (isNaN(d.getTime())) return;
+        const year = d.getUTCFullYear();
+        const month = d.getUTCMonth();
+        const date = d.getUTCDate();
+        
+        const sortKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+        
+        if (!groups[sortKey]) {
+          groups[sortKey] = {
+            dateVal: new Date(Date.UTC(year, month, date)),
+            count: 0
+          };
+        }
+        groups[sortKey].count += 1;
+      } catch (err) {
+        console.error("Error processing payment timestamp:", err);
+      }
+    });
+
+    const sortedKeys = Object.keys(groups).sort();
+    return sortedKeys.map(key => {
+      const g = groups[key];
+      const d = g.dateVal;
+      const dateStr = `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+      return {
+        date: dateStr,
+        paymentCount: g.count
+      };
+    });
+  }, [payments]);
+
   // Find max volume to calculate percentage heights for chart columns
-  const maxVolume = Math.max(...mockVolumeHistory.map(d => d.paymentCount));
+  const maxVolume = useMemo(() => {
+    return derivedVolumeHistory.length > 0 
+      ? Math.max(...derivedVolumeHistory.map(d => d.paymentCount)) 
+      : 1;
+  }, [derivedVolumeHistory]);
+
+  // Addition 2 & 3 state and helpers
+  const [solvencyAttestation, setSolvencyAttestation] = useState<{
+    timestamp: number;
+    ledger: number;
+    proofHash: string;
+  } | null | undefined>(undefined);
+
+  const [isAttesting, setIsAttesting] = useState(false);
+  const [attestationLabel, setAttestationLabel] = useState("Generate Solvency Proof");
+  const [attestationError, setAttestationError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Addition 2 — Read solvency proof hash from Soroban contract
+  const fetchSolvencyAttestation = async () => {
+    try {
+      const sdk = await import('@stellar/stellar-sdk');
+      const { Contract, rpc, Account, TransactionBuilder } = sdk;
+      const server = new rpc.Server(CONTRACTS.sorobanRpcUrl);
+      const contract = new Contract(CONTRACTS.verifier);
+      
+      const dummyAccount = new Account("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF", "0");
+      const tx = new TransactionBuilder(dummyAccount, {
+        fee: "100",
+        networkPassphrase: CONTRACTS.networkPassphrase,
+      })
+      .addOperation(contract.call("get_solvency_attestation"))
+      .setTimeout(30)
+      .build();
+      
+      const sim = await server.simulateTransaction(tx);
+      if (rpc.Api.isSimulationError(sim)) {
+        throw new Error(`Simulation failed: ${sim.error}`);
+      }
+      
+      if (sim.result && sim.result.retval) {
+        const nativeVal = sdk.scValToNative(sim.result.retval);
+        if (nativeVal) {
+          let proofHashHex = '';
+          const hashBytes = nativeVal.proof_hash;
+          if (hashBytes instanceof Uint8Array || Buffer.isBuffer(hashBytes)) {
+            proofHashHex = '0x' + Array.from(hashBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+          } else if (typeof hashBytes === 'string') {
+            proofHashHex = hashBytes.startsWith('0x') ? hashBytes : '0x' + hashBytes;
+          } else {
+            proofHashHex = String(hashBytes);
+          }
+          
+          return {
+            timestamp: Number(nativeVal.timestamp),
+            ledger: Number(nativeVal.ledger),
+            proofHash: proofHashHex
+          };
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error("fetchSolvencyAttestation failed:", err);
+      throw err;
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    fetchSolvencyAttestation().then(res => {
+      if (!active) return;
+      setSolvencyAttestation(res);
+    }).catch((err) => {
+      console.error("Initial solvency attestation fetch failed:", err);
+      if (!active) return;
+      setSolvencyAttestation(null);
+    });
+    return () => { active = false; };
+  }, []);
+
+  // Addition 3 — "Generate Solvency Proof" button operations
+  const generateSolvencyProof = async () => {
+    if (!liveBalance) {
+      throw new Error("Connected wallet has no balance loaded.");
+    }
+    const balanceVal = parseFloat(liveBalance);
+    if (isNaN(balanceVal) || balanceVal <= 0) {
+      throw new Error("Connected wallet has 0 XLM balance (assets must exceed liabilities).");
+    }
+    
+    const total_assets = Math.round(balanceVal * 1e7).toString();
+    const total_liabilities = "0";
+    
+    const { generateProof } = await import('../lib/zkProver');
+    const { default: solvencyCircuit } = await import('../circuits/solvency_circuit.json');
+    
+    return await generateProof(solvencyCircuit as any, {
+      total_assets,
+      total_liabilities
+    });
+  };
+
+  const submitSolvencyAttestation = async (proofBytes: Uint8Array, publicInputs: string[]) => {
+    const [{ publicInputsToBytes }, sdk, freighter] = await Promise.all([
+      import('../lib/zkProver'),
+      import('@stellar/stellar-sdk'),
+      import('@stellar/freighter-api'),
+    ]);
+    const { Contract, TransactionBuilder, Address, nativeToScVal, BASE_FEE, rpc } = sdk;
+    
+    if (!walletAddress) {
+      throw new Error("Freighter wallet is not connected.");
+    }
+    
+    const server = new rpc.Server(CONTRACTS.sorobanRpcUrl);
+    const account = await server.getAccount(walletAddress);
+    
+    const contract = new Contract(CONTRACTS.verifier);
+    const operation = contract.call(
+      'attest_solvency',
+      nativeToScVal(publicInputsToBytes(publicInputs), { type: 'bytes' }),
+      nativeToScVal(proofBytes, { type: 'bytes' })
+    );
+    
+    const tx = new TransactionBuilder(account, {
+      fee: (Number(BASE_FEE) * 10).toString(),
+      networkPassphrase: CONTRACTS.networkPassphrase,
+    })
+      .addOperation(operation)
+      .setTimeout(120)
+      .build();
+      
+    const prepared = await server.prepareTransaction(tx);
+    const signed = await freighter.signTransaction(prepared.toXDR(), {
+      networkPassphrase: CONTRACTS.networkPassphrase,
+      address: walletAddress,
+    });
+    
+    if (signed.error || !signed.signedTxXdr) {
+      throw new Error(signed.error?.message || 'Transaction signing rejected');
+    }
+    
+    const sendResponse = await server.sendTransaction(
+      TransactionBuilder.fromXDR(signed.signedTxXdr, CONTRACTS.networkPassphrase)
+    );
+    if (sendResponse.status === 'ERROR') {
+      throw new Error('Transaction submission failed');
+    }
+    
+    const deadline = Date.now() + 60_000;
+    for (;;) {
+      const result = await server.getTransaction(sendResponse.hash);
+      if (result.status === 'SUCCESS') {
+        return sendResponse.hash;
+      }
+      if (result.status === 'FAILED') {
+        throw new Error('On-chain solvency verification failed.');
+      }
+      if (Date.now() > deadline) {
+        throw new Error('Confirmation timeout');
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  };
+
+  const handleGenerateSolvencyProof = async () => {
+    setIsAttesting(true);
+    setAttestationLabel("Generating proof...");
+    setAttestationError(null);
+    setShowSuccess(false);
+    
+    try {
+      const proofResult = await generateSolvencyProof();
+      setAttestationLabel("Attesting on-chain...");
+      await submitSolvencyAttestation(proofResult.proof, proofResult.publicInputs);
+      
+      const updated = await fetchSolvencyAttestation();
+      setSolvencyAttestation(updated);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err: any) {
+      setAttestationError(err?.message || "Solvency proof generation or submission failed.");
+    } finally {
+      setIsAttesting(false);
+      setAttestationLabel("Generate Solvency Proof");
+    }
+  };
+
+  const formatProofHash = (hash: string) => {
+    if (!hash) return '';
+    let clean = hash;
+    if (!clean.startsWith('0x')) {
+      clean = '0x' + clean;
+    }
+    if (clean.length <= 12) return clean;
+    return `${clean.slice(0, 6)}...${clean.slice(-4)}`;
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = date.getUTCDate();
+    const month = months[date.getUTCMonth()];
+    const year = date.getUTCFullYear();
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    return `Verified ${day} ${month} ${year} ${hours}:${minutes} UTC`;
+  };
 
   return (
     <div className="animate-fade-in">
@@ -77,10 +330,67 @@ export const TreasuryOverview: React.FC = () => {
             </div>
             <div>
               <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', display: 'block', textTransform: 'uppercase' }}>Public Proof Reference</span>
-              <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', display: 'block', marginTop: '4px', wordBreak: 'break-all' }}>
-                {mockTreasury.proofHash}
-              </span>
+              {solvencyAttestation === undefined ? (
+                <div 
+                  style={{ 
+                    height: '16px', 
+                    width: '120px', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)', 
+                    borderRadius: '4px', 
+                    marginTop: '6px', 
+                    animation: 'pulseGlow 2s infinite' 
+                  }} 
+                />
+              ) : solvencyAttestation === null ? (
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '4px', fontStyle: 'italic' }}>
+                  Not yet attested
+                </span>
+              ) : (
+                <div style={{ marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', display: 'block', wordBreak: 'break-all' }}>
+                    {formatProofHash(solvencyAttestation.proofHash)}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '2px' }}>
+                    {formatTimestamp(solvencyAttestation.timestamp)}
+                  </span>
+                </div>
+              )}
             </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button 
+                onClick={handleGenerateSolvencyProof} 
+                disabled={isAttesting || !walletAddress}
+                className="btn-primary"
+              >
+                {isAttesting ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin-fast" />
+                    <span>{attestationLabel}</span>
+                  </>
+                ) : (
+                  <span>Generate Solvency Proof</span>
+                )}
+              </button>
+              
+              {showSuccess && (
+                <span className="card-indicator success" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', animation: 'fadeIn 0.3s ease' }}>
+                  <Check size={12} />
+                  <span>Attested ✓</span>
+                </span>
+              )}
+            </div>
+            
+            {attestationError && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', padding: '8px 12px', background: 'var(--color-error-dim)', border: '1px solid rgba(255, 23, 68, 0.15)', borderRadius: '6px', marginTop: '0.5rem' }}>
+                <AlertTriangle size={12} style={{ color: 'var(--color-error)', flexShrink: 0, marginTop: '2px' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  {attestationError}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -99,7 +409,7 @@ export const TreasuryOverview: React.FC = () => {
 
           {/* Core Interactive Bar Chart */}
           <div className="chart-container-premium">
-            {mockVolumeHistory.map((h, idx) => {
+            {derivedVolumeHistory.map((h, idx) => {
               const percentage = (h.paymentCount / maxVolume) * 100;
               return (
                 <div key={idx} className="chart-bar-col">

@@ -268,10 +268,10 @@ Mark items `[x]` as we finish them.
 | Frontend bug fixes | ✅ Done |
 | UI screens & flows | ✅ Done |
 | Wallet connect (Freighter) | ✅ Done |
-| Noir circuits | 🔴 In progress |
-| Proof generation (real) | 🔴 Not started |
-| Soroban contract | 🔴 Not started |
-| Frontend ↔ chain wiring | 🔴 Not started |
-| Live treasury balance | 🔴 Not started |
-| README | 🔴 Not started |
+| Noir circuits | ✅ Done |
+| Proof generation (real) | ✅ Done |
+| Soroban contract | ✅ Done |
+| Frontend ↔ chain wiring | ✅ Done |
+| Live treasury balance | 🟡 In progress |
+| README | 🟡 In progress |
 | Demo video | 🔴 Not started |

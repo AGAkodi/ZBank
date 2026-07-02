@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   isConnected as freighterIsConnected,
   isAllowed,
@@ -62,6 +62,82 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setSelectedTx(mockPayments[0]);
     }
   }, []);
+
+  const lastLoadedAddressRef = useRef<string | null>(null);
+
+  // Read from localStorage on connect / clear on disconnect
+  useEffect(() => {
+    if (!walletAddress) {
+      setPayments(mockPayments);
+      setAuditors(mockAuditors);
+      if (mockPayments.length > 0) {
+        setSelectedTx(mockPayments[0]);
+      }
+      lastLoadedAddressRef.current = null;
+      return;
+    }
+
+    try {
+      const savedPayments = localStorage.getItem(`zbank_payments_${walletAddress}`);
+      if (savedPayments) {
+        const parsed = JSON.parse(savedPayments);
+        setPayments(parsed);
+        if (parsed.length > 0) {
+          setSelectedTx(parsed[0]);
+        }
+      } else {
+        setPayments(mockPayments);
+        if (mockPayments.length > 0) {
+          setSelectedTx(mockPayments[0]);
+        }
+      }
+    } catch (e) {
+      setPayments(mockPayments);
+      if (mockPayments.length > 0) {
+        setSelectedTx(mockPayments[0]);
+      }
+    }
+
+    try {
+      const savedAuditors = localStorage.getItem(`zbank_disclosure_${walletAddress}`);
+      if (savedAuditors) {
+        const parsed = JSON.parse(savedAuditors);
+        setAuditors(parsed);
+      } else {
+        setAuditors(mockAuditors);
+      }
+    } catch (e) {
+      setAuditors(mockAuditors);
+    }
+
+    lastLoadedAddressRef.current = walletAddress;
+  }, [walletAddress]);
+
+  // Write payments to localStorage on change
+  useEffect(() => {
+    if (!walletAddress || lastLoadedAddressRef.current !== walletAddress) return;
+    try {
+      localStorage.setItem(
+        `zbank_payments_${walletAddress}`,
+        JSON.stringify(payments)
+      );
+    } catch (e) {
+      // silent fail
+    }
+  }, [payments, walletAddress]);
+
+  // Write disclosure grants (auditors) to localStorage on change
+  useEffect(() => {
+    if (!walletAddress || lastLoadedAddressRef.current !== walletAddress) return;
+    try {
+      localStorage.setItem(
+        `zbank_disclosure_${walletAddress}`,
+        JSON.stringify(auditors)
+      );
+    } catch (e) {
+      // silent fail
+    }
+  }, [auditors, walletAddress]);
 
   // Resolve detected network string to our NetworkType
   const resolveNetwork = (net: string): NetworkType =>
