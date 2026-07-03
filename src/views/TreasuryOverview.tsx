@@ -350,9 +350,20 @@ export const TreasuryOverview: React.FC = () => {
                 </span>
               ) : (
                 <div style={{ marginTop: '4px' }}>
-                  <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', display: 'block', wordBreak: 'break-all' }}>
-                    {formatProofHash(solvencyAttestation.proofHash)}
-                  </span>
+                  {solvencyAttestation.proofHash ? (
+                    <a
+                      href="https://stellar.expert/explorer/testnet/contract/CAHC6LH4MWQXFSZ7Z4UNY3ZCHGU4III6SKA5YKKXMTIMARYIO72PMCXV"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', display: 'block', wordBreak: 'break-all', textDecoration: 'none' }}
+                    >
+                      {formatProofHash(solvencyAttestation.proofHash)}
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', display: 'block', wordBreak: 'break-all' }}>
+                      {formatProofHash(solvencyAttestation.proofHash)}
+                    </span>
+                  )}
                   <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '2px' }}>
                     {formatTimestamp(solvencyAttestation.timestamp)}
                   </span>
